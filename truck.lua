@@ -1,4 +1,4 @@
--- Car profile
+-- Truck profile for EU (NL, DE, BE, LU, FR)
 
 api_version = 4
 
@@ -15,7 +15,7 @@ Measure = require("lib/measure")
 function setup()
   return {
     properties = {
-      max_speed_for_map_matching      = 180/3.6, -- 180kmph -> m/s
+      max_speed_for_map_matching      = 90/3.6, -- 90kmph -> m/s (truck speed limit)
       -- For routing based on duration, but weighted for preferring certain roads
       weight_name                     = 'routability',
       -- For shortest duration without penalties for accessibility
@@ -23,7 +23,7 @@ function setup()
       -- For shortest distance without penalties for accessibility
       -- weight_name                     = 'distance',
       process_call_tagless_node      = false,
-      u_turn_penalty                 = 20,
+      u_turn_penalty                 = 60, -- Higher penalty for trucks
       continue_straight_at_waypoint  = true,
       use_turn_restrictions          = true,
       left_hand_driving              = false,
@@ -33,18 +33,18 @@ function setup()
     default_speed             = 10,
     oneway_handling           = true,
     side_road_multiplier      = 0.8,
-    turn_penalty              = 7.5,
+    turn_penalty              = 15, -- Higher turn penalty for trucks
     speed_reduction           = 0.8,
     turn_bias                 = 1.075,
     cardinal_directions       = false,
 
-    -- Size of the vehicle, to be limited by physical restriction of the way
-    vehicle_height = 2.0, -- in meters, 2.0m is the height slightly above biggest SUVs
-    vehicle_width = 1.9, -- in meters, ways with narrow tag are considered narrower than 2.2m
-
+    -- Size of the vehicle - typical EU truck dimensions
+    vehicle_height = 4.0, -- in meters, standard truck height limit in EU
+    vehicle_width = 2.55, -- in meters, standard truck width limit in EU
+    
     -- Size of the vehicle, to be limited mostly by legal restriction of the way
-    vehicle_length = 4.8, -- in meters, 4.8m is the length of large or family car
-    vehicle_weight = 2000, -- in kilograms
+    vehicle_length = 16.5, -- in meters, standard truck length (18.75m for articulated)
+    vehicle_weight = 40000, -- in kilograms, 40 tonnes is typical EU limit
 
     -- a list of suffixes to suppress in name change instructions. The suffixes also include common substrings of each other
     suffix_list = {
@@ -60,18 +60,18 @@ function setup()
       'lift_gate',
       'no',
       'entrance',
-      'height_restrictor',
       'arch'
     },
 
     access_tag_whitelist = Set {
       'yes',
-      'motorcar',
-      'motor_vehicle',
+      'hgv',
+      'truck',
+      'goods',
       'vehicle',
       'permissive',
       'designated',
-      'hov'
+      'delivery'
     },
 
     access_tag_blacklist = Set {
@@ -82,7 +82,6 @@ function setup()
       'psv',
       'customers',
       'private',
-      'delivery',
       'destination'
     },
 
@@ -99,8 +98,9 @@ function setup()
     },
 
     access_tags_hierarchy = Sequence {
-      'motorcar',
-      'motor_vehicle',
+      'hgv',
+      'truck',
+      'goods',
       'vehicle',
       'access'
     },
@@ -110,8 +110,9 @@ function setup()
     },
 
     restrictions = Sequence {
-      'motorcar',
-      'motor_vehicle',
+      'hgv',
+      'truck',
+      'goods',
       'vehicle'
     },
 
@@ -135,7 +136,6 @@ function setup()
       -- 'toll',    -- uncomment this to avoid tolls
       'reversible',
       'impassable',
-      'hov_lanes',
       'steps',
       'construction',
       'proposed'
@@ -143,18 +143,18 @@ function setup()
 
     speeds = Sequence {
       highway = {
-        motorway        = 90,
-        motorway_link   = 45,
-        trunk           = 85,
-        trunk_link      = 40,
-        primary         = 65,
-        primary_link    = 30,
-        secondary       = 55,
+        motorway        = 80,  -- EU truck speed limit on motorways
+        motorway_link   = 40,
+        trunk           = 80,  -- Often same as motorway for trucks
+        trunk_link      = 35,
+        primary         = 60,
+        primary_link    = 25,
+        secondary       = 50,
         secondary_link  = 25,
         tertiary        = 40,
         tertiary_link   = 20,
-        unclassified    = 25,
-        residential     = 25,
+        unclassified    = 30,
+        residential     = 20,  -- Lower speed in residential areas
         living_street   = 10,
         service         = 15
       }
@@ -212,109 +212,90 @@ function setup()
       ["concrete:lanes"] = nil,
       paved = nil,
 
-      cement = 80,
-      compacted = 80,
-      fine_gravel = 80,
+      cement = 60,
+      compacted = 60,
+      fine_gravel = 60,
 
-      paving_stones = 60,
-      metal = 60,
-      bricks = 60,
+      paving_stones = 40,
+      metal = 40,
+      bricks = 40,
 
-      grass = 40,
-      wood = 40,
-      sett = 40,
-      grass_paver = 40,
-      gravel = 40,
-      unpaved = 40,
-      ground = 40,
-      dirt = 40,
-      pebblestone = 40,
-      tartan = 40,
+      grass = 20,
+      wood = 30,
+      sett = 30,
+      grass_paver = 30,
+      gravel = 30,
+      unpaved = 30,
+      ground = 30,
+      dirt = 30,
+      pebblestone = 30,
+      tartan = 30,
 
-      cobblestone = 30,
-      clay = 30,
+      cobblestone = 20,
+      clay = 20,
 
-      earth = 20,
-      stone = 20,
-      rocky = 20,
-      sand = 20,
+      earth = 15,
+      stone = 15,
+      rocky = 15,
+      sand = 15,
 
       mud = 10
     },
 
     -- max speed for tracktypes
     tracktype_speeds = {
-      grade1 =  60,
-      grade2 =  40,
-      grade3 =  30,
-      grade4 =  25,
-      grade5 =  20
+      grade1 =  50,
+      grade2 =  30,
+      grade3 =  20,
+      grade4 =  15,
+      grade5 =  10
     },
 
     -- max speed for smoothnesses
     smoothness_speeds = {
-      intermediate    =  80,
-      bad             =  40,
-      very_bad        =  20,
+      intermediate    =  60,
+      bad             =  30,
+      very_bad        =  15,
       horrible        =  10,
       very_horrible   =  5,
       impassable      =  0
     },
 
     -- http://wiki.openstreetmap.org/wiki/Speed_limits
+    -- Truck-specific speed limits for EU countries
     maxspeed_table_default = {
       urban = 50,
-      rural = 90,
-      trunk = 110,
-      motorway = 130
+      rural = 80,
+      trunk = 80,
+      motorway = 80
     },
 
-    -- List only exceptions
+    -- List only exceptions - truck-specific limits for EU countries
     maxspeed_table = {
-      ["at:rural"] = 100,
-      ["at:trunk"] = 100,
-      ["be:motorway"] = 120,
-      ["be-bru:rural"] = 70,
+      ["be:motorway"] = 90,
+      ["be:rural"] = 60,
+      ["be:urban"] = 50,
+      ["be-bru:rural"] = 60,
       ["be-bru:urban"] = 30,
-      ["be-vlg:rural"] = 70,
-      ["bg:motorway"] = 140,
-      ["by:urban"] = 60,
-      ["by:motorway"] = 110,
-      ["ca-on:rural"] = 80,
-      ["ch:rural"] = 80,
-      ["ch:trunk"] = 100,
-      ["ch:motorway"] = 120,
-      ["cz:trunk"] = 0,
-      ["cz:motorway"] = 0,
+      ["be-vlg:rural"] = 60,
+      ["de:rural"] = 60,
+      ["de:trunk"] = 60,
+      ["de:motorway"] = 80,
+      ["de:urban"] = 50,
       ["de:living_street"] = 7,
-      ["de:rural"] = 100,
-      ["de:motorway"] = 0,
-      ["dk:rural"] = 80,
-      ["es:trunk"] = 90,
       ["fr:rural"] = 80,
-      ["gb:nsl_single"] = (60*1609)/1000,
-      ["gb:nsl_dual"] = (70*1609)/1000,
-      ["gb:motorway"] = (70*1609)/1000,
+      ["fr:trunk"] = 80,
+      ["fr:motorway"] = 90,
+      ["fr:urban"] = 50,
+      ["lu:rural"] = 75,
+      ["lu:trunk"] = 75,
+      ["lu:motorway"] = 90,
+      ["lu:urban"] = 50,
       ["nl:rural"] = 80,
-      ["nl:trunk"] = 100,
-      ['no:rural'] = 80,
-      ['no:motorway'] = 110,
-      ['ph:urban'] = 40,
-      ['ph:rural'] = 80,
-      ['ph:motorway'] = 100,
-      ['pl:rural'] = 100,
-      ['pl:expressway'] = 120,
-      ['pl:motorway'] = 140,
-      ["ro:trunk"] = 100,
-      ["ru:living_street"] = 20,
-      ["ru:urban"] = 60,
-      ["ru:motorway"] = 110,
-      ["uk:nsl_single"] = (60*1609)/1000,
-      ["uk:nsl_dual"] = (70*1609)/1000,
-      ["uk:motorway"] = (70*1609)/1000,
-      ['za:urban'] = 60,
-      ['za:rural'] = 100,
-      ["none"] = 140
+      ["nl:trunk"] = 80,
+      ["nl:motorway"] = 80,
+      ["nl:urban"] = 50,
+      ["none"] = 90
     },
 
     relation_types = Sequence {
@@ -432,9 +413,6 @@ function process_way(profile, way, result, relations)
 
     -- handle service road restrictions
     WayHandlers.service,
-
-    -- handle hov
-    WayHandlers.hov,
 
     -- compute speed taking into account way type, maxspeed tags, etc.
     WayHandlers.speed,
