@@ -1,4 +1,4 @@
--- Truck profile for EU (NL, DE, BE, LU, FR)
+-- Truck profile
 
 api_version = 4
 
