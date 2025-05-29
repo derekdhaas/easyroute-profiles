@@ -60,18 +60,18 @@ function setup()
       'lift_gate',
       'no',
       'entrance',
+      'height_restrictor',
       'arch'
     },
 
     access_tag_whitelist = Set {
       'yes',
-      'hgv',
-      'truck',
-      'goods',
+      'motorcar',
+      'motor_vehicle',
       'vehicle',
       'permissive',
       'designated',
-      'delivery'
+      'hov'
     },
 
     access_tag_blacklist = Set {
@@ -82,6 +82,7 @@ function setup()
       'psv',
       'customers',
       'private',
+      'delivery',
       'destination'
     },
 
@@ -98,9 +99,8 @@ function setup()
     },
 
     access_tags_hierarchy = Sequence {
-      'hgv',
-      'truck',
-      'goods',
+      'motorcar',
+      'motor_vehicle',
       'vehicle',
       'access'
     },
@@ -110,9 +110,8 @@ function setup()
     },
 
     restrictions = Sequence {
-      'hgv',
-      'truck',
-      'goods',
+      'motorcar',
+      'motor_vehicle',
       'vehicle'
     },
 
@@ -136,6 +135,7 @@ function setup()
       -- 'toll',    -- uncomment this to avoid tolls
       'reversible',
       'impassable',
+      'hov_lanes',
       'steps',
       'construction',
       'proposed'
@@ -270,23 +270,39 @@ function setup()
       motorway = 80
     },
 
-    -- List only exceptions - truck-specific limits for EU countries
+    -- List only exceptions - truck-specific limits for various countries
     maxspeed_table = {
+      ["at:rural"] = 70,
+      ["at:trunk"] = 80,
       ["be:motorway"] = 90,
       ["be:rural"] = 60,
       ["be:urban"] = 50,
       ["be-bru:rural"] = 60,
       ["be-bru:urban"] = 30,
       ["be-vlg:rural"] = 60,
+      ["bg:motorway"] = 100,
+      ["by:urban"] = 60,
+      ["by:motorway"] = 110,
+      ["ca-on:rural"] = 105,
+      ["ch:rural"] = 80,
+      ["ch:trunk"] = 80,
+      ["ch:motorway"] = 80,
+      ["cz:trunk"] = 80,
+      ["cz:motorway"] = 80,
       ["de:rural"] = 60,
       ["de:trunk"] = 60,
       ["de:motorway"] = 80,
       ["de:urban"] = 50,
       ["de:living_street"] = 7,
+      ["dk:rural"] = 70,
+      ["es:trunk"] = 80,
       ["fr:rural"] = 80,
       ["fr:trunk"] = 80,
       ["fr:motorway"] = 90,
       ["fr:urban"] = 50,
+      ["gb:nsl_single"] = 80,
+      ["gb:nsl_dual"] = 96,
+      ["gb:motorway"] = 96,
       ["lu:rural"] = 75,
       ["lu:trunk"] = 75,
       ["lu:motorway"] = 90,
@@ -295,6 +311,24 @@ function setup()
       ["nl:trunk"] = 80,
       ["nl:motorway"] = 80,
       ["nl:urban"] = 50,
+      ['no:rural'] = 80,
+      ['no:motorway'] = 80,
+      ['ph:urban'] = 30,
+      ['ph:rural'] = 60,
+      ['ph:motorway'] = 80,
+      ['pl:rural'] = 70,
+      ['pl:trunk'] = 80,
+      ['pl:expressway'] = 80,
+      ['pl:motorway'] = 80,
+      ["ro:trunk"] = 80,
+      ["ru:living_street"] = 20,
+      ["ru:urban"] = 60,
+      ["ru:motorway"] = 110,
+      ["uk:nsl_single"] = 80,
+      ["uk:nsl_dual"] = 96,
+      ["uk:motorway"] = 96,
+      ['za:urban'] = 60,
+      ['za:rural'] = 80,
       ["none"] = 90
     },
 
@@ -413,6 +447,9 @@ function process_way(profile, way, result, relations)
 
     -- handle service road restrictions
     WayHandlers.service,
+
+    -- handle hov
+    WayHandlers.hov,
 
     -- compute speed taking into account way type, maxspeed tags, etc.
     WayHandlers.speed,
